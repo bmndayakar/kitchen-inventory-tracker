@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kitchen Inventory</title>
+<link rel="stylesheet" href="style.css?v=3">
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="header-left">
+      <h1>Kitchen Inventory</h1>
+      <span id="header-date" class="header-date"></span>
+    </div>
+    <button class="btn-add-toggle" id="toggle-add" title="Add item">+</button>
+  </div>
+</header>
+
+<main>
+
+  <section id="dashboard">
+    <div class="stat-card">
+      <span class="stat-icon">📦</span>
+      <div class="stat-body">
+        <div class="stat-number" id="stat-total">-</div>
+        <div class="stat-label">Total Items</div>
+      </div>
+    </div>
+    <div class="stat-card green">
+      <span class="stat-icon">✅</span>
+      <div class="stat-body">
+        <div class="stat-number" id="stat-in-stock">-</div>
+        <div class="stat-label">In Stock</div>
+      </div>
+    </div>
+    <div class="stat-card amber">
+      <span class="stat-icon">⚠️</span>
+      <div class="stat-body">
+        <div class="stat-number" id="stat-low">-</div>
+        <div class="stat-label">Low Stock</div>
+      </div>
+    </div>
+    <div class="stat-card red">
+      <span class="stat-icon">🚫</span>
+      <div class="stat-body">
+        <div class="stat-number" id="stat-out">-</div>
+        <div class="stat-label">Out of Stock</div>
+      </div>
+    </div>
+    <div class="stat-card blue">
+      <span class="stat-icon">💰</span>
+      <div class="stat-body">
+        <div class="stat-number" id="stat-value">-</div>
+        <div class="stat-label">Stock Value</div>
+      </div>
+    </div>
+    <div class="last-updated" id="last-updated"></div>
+  </section>
+
+  <section id="add-form-section" class="collapsed">
+    <form id="add-form">
+      <div class="form-row">
+        <input type="text" id="name" placeholder="Item name" required>
+        <select id="category">
+          <option value="grains">Rice, Flour &amp; Grains</option>
+          <option value="oils">Oils &amp; Fats</option>
+          <option value="salt-sugar">Salt, Sugar &amp; Sweeteners</option>
+          <option value="pulses">Pulses</option>
+          <option value="spices">Spices &amp; Masalas</option>
+          <option value="sauces">Sauces &amp; Condiments</option>
+          <option value="dry-fruits">Dry Fruits, Nuts &amp; Seeds</option>
+          <option value="cooking">Cooking Ingredients</option>
+          <option value="ready-to-serve">Ready-to-Serve</option>
+          <option value="packaging">Packaging</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <input type="number" id="quantity" placeholder="Qty" min="0" step="0.1" value="1" required>
+        <input type="text" id="unit" placeholder="Unit (pcs, kg, L...)" value="pcs" required>
+        <input type="number" id="low_stock_threshold" placeholder="Low stock at" min="0" step="0.1" value="1" required>
+        <input type="date" id="expiry_date">
+      </div>
+      <button type="submit" class="btn-primary">Add Item</button>
+    </form>
+  </section>
+
+  <section id="controls">
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="search" placeholder="Search items...">
+    </div>
+    <div id="filters">
+      <button class="chip active" data-filter="all">All</button>
+      <button class="chip" data-filter="grains">Grains</button>
+      <button class="chip" data-filter="oils">Oils</button>
+      <button class="chip" data-filter="salt-sugar">Salt &amp; Sugar</button>
+      <button class="chip" data-filter="pulses">Pulses</button>
+      <button class="chip" data-filter="spices">Spices</button>
+      <button class="chip" data-filter="sauces">Sauces</button>
+      <button class="chip" data-filter="dry-fruits">Dry Fruits</button>
+      <button class="chip" data-filter="cooking">Cooking</button>
+      <button class="chip" data-filter="ready-to-serve">Ready</button>
+      <button class="chip" data-filter="packaging">Packaging</button>
+      <button class="chip" data-filter="other">Other</button>
+    </div>
+    <label class="toggle-label">
+      <input type="checkbox" id="low-stock-only">
+      <span class="toggle-text">Low / out of stock only</span>
+    </label>
+  </section>
+
+  <section id="view-tabs">
+    <button class="view-tab active" data-view="inventory">Inventory</button>
+    <button class="view-tab" data-view="log">Activity Log</button>
+  </section>
+
+  <section id="items-list"></section>
+
+  <section id="log-view" class="hidden">
+    <div class="log-date-picker">
+      <label class="modal-label">Date</label>
+      <input type="date" id="log-date">
+    </div>
+    <div id="log-list"></div>
+  </section>
+</main>
+
+<div class="modal-overlay" id="quick-add-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-title">Add Item</h3>
+      <button class="modal-close" id="modal-close">✕</button>
+    </div>
+    <form id="quick-add-form">
+      <input type="hidden" id="modal-category">
+      <div class="modal-field">
+        <label class="modal-label">Item Name</label>
+        <input type="text" id="modal-name" placeholder="e.g. Basmati Rice" required>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Opening Stock</label>
+        <input type="number" id="modal-qty" placeholder="Enter quantity" min="0" step="0.1" value="1" required>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Unit of Measurement</label>
+        <select id="modal-unit" required>
+          <option value="kg">kg</option>
+          <option value="g">gms</option>
+          <option value="packets">packets</option>
+          <option value="bottles">bottles</option>
+          <option value="L">ltr</option>
+          <option value="box">box</option>
+          <option value="pcs">pcs</option>
+        </select>
+      </div>
+      <button type="submit" class="btn-primary">Add Item</button>
+    </form>
+  </div>
+</div>
+
+<div class="modal-overlay" id="stock-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="stock-modal-title">Stock Movement</h3>
+      <button class="modal-close" id="stock-modal-close">✕</button>
+    </div>
+    <form id="stock-form">
+      <input type="hidden" id="stock-item-id">
+      <input type="hidden" id="stock-type">
+      <div class="modal-field">
+        <label class="modal-label" id="stock-qty-label">Quantity</label>
+        <input type="number" id="stock-qty" placeholder="Enter amount" min="0.1" step="0.1" required>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label" id="stock-price-label">Price (optional)</label>
+        <input type="number" id="stock-price" placeholder="e.g. 250" min="0" step="0.01">
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Note (optional)</label>
+        <input type="text" id="stock-note" placeholder="e.g. Used for dinner, Bought from store">
+      </div>
+      <button type="submit" class="btn-primary" id="stock-submit-btn">Confirm</button>
+    </form>
+  </div>
+</div>
+
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Edit Item</h3>
+      <button class="modal-close" id="edit-modal-close">✕</button>
+    </div>
+    <form id="edit-form">
+      <input type="hidden" id="edit-id">
+      <div class="modal-field">
+        <label class="modal-label">Item Name</label>
+        <input type="text" id="edit-name" required>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Unit of Measurement</label>
+        <select id="edit-unit" required>
+          <option value="kg">kg</option>
+          <option value="g">gms</option>
+          <option value="packets">packets</option>
+          <option value="bottles">bottles</option>
+          <option value="L">ltr</option>
+          <option value="box">box</option>
+          <option value="pcs">pcs</option>
+        </select>
+      </div>
+      <button type="submit" class="btn-primary">Save Changes</button>
+    </form>
+  </div>
+</div>
+
+<div class="modal-overlay" id="history-modal">
+  <div class="modal modal-wide">
+    <div class="modal-header">
+      <h3 id="history-modal-title">Item History</h3>
+      <button class="modal-close" id="history-modal-close">✕</button>
+    </div>
+    <div class="history-body">
+      <div class="history-legend">
+        <span class="legend-item"><span class="legend-dot consumed"></span> Consumed</span>
+        <span class="legend-item"><span class="legend-dot added"></span> Added</span>
+      </div>
+      <div class="history-chart-wrap">
+        <canvas id="history-chart"></canvas>
+      </div>
+      <div id="history-empty" class="empty-msg hidden">No activity recorded for this item.</div>
+    </div>
+  </div>
+</div>
+
+<script src="app.js?v=3"></script>
+</body>
+</html>
